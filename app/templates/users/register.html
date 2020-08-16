@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>register</title>
+
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        body{
+            background-color: #ECF0FF;
+        }
+    </style>
+
+</head>
+<body>
+<section id="app" class="ftco-section contact-section ftco-no-pb" id="contact-section">
+    <div class="container">
+        <div class="row no-gutters block-9">
+            <h3>注册界面</h3>
+        </div>
+        <div class="row no-gutters block-9">
+            <div class="col-md-6 order-md-last d-flex">
+                <form class="bg-light p-4 p-md-5 contact-form" method="post">
+                    {[ form.csrf_token ]}
+                    <div class="form-group">
+                        <input type="email" name="email" class="form-control" placeholder="Your Email">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password_1" class="form-control" placeholder="Your Password">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" name="password_2" class="form-control" placeholder="Password again">
+                    </div>
+                    <div class="form-group">
+                        <button class="btn" onclick="yzm()">向邮箱发送验证码</button>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" name="code" class="form-control" placeholder="Verification Code">
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" onclick="login()" value="Send Message" class="btn btn-primary py-3 px-5">
+                    </div>
+                </form>
+
+            </div>
+
+            <div class="col-md-6 d-flex">
+                <div class="img" style="background-image: url(/static/images//about.jpg);"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+
+<script>
+
+    function yzm() {
+        $.get('/email/', function (result) {
+            console.log(result)
+        })
+    }
+
+</script>
+
+</body>
+</html>
