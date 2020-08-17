@@ -3,6 +3,7 @@ from flask_migrate import MigrateCommand, Migrate
 from app import make_app
 from app.models import db
 
+
 # app命令启动
 class OurRun(Command):
     def run(self):
