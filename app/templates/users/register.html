@@ -21,18 +21,30 @@
                     {[ form.csrf_token ]}
                     <div class="form-group">
                         <input type="email" id="email" name="email" class="form-control" placeholder="Your Email">
+                        {% for err in form.email.errors %}
+                            <small style="color: red">{[ err ]}</small>
+                        {% endfor %}
                     </div>
                     <div class="form-group">
                         <input type="password" id="password_1" name="password_1" class="form-control" placeholder="Your Password">
+                        {% for err in form.password_1.errors %}
+                            <small style="color: red">{[ err ]}</small>
+                        {% endfor %}
                     </div>
                     <div class="form-group">
                         <input type="password" id="password_2" name="password_2" class="form-control" placeholder="Password again">
+                        {% for err in form.password_2.errors %}
+                            <small style="color: red">{[ err ]}</small>
+                        {% endfor %}
                     </div>
                     <div class="form-group">
                         <button class="btn" onclick="yzm()">向邮箱发送验证码</button>
                     </div>
                     <div class="form-group">
                         <input type="text" id="code" name="code" class="form-control" placeholder="Verification Code">
+                        {% for err in form.code.errors %}
+                            <small style="color: red">{[ err ]}</small>
+                        {% endfor %}
                     </div>
                     <div class="form-group">
                         <input type="submit" onclick="reg()" value="注册" class="btn btn-primary py-3 px-5 col-sm-6">
@@ -55,7 +67,6 @@
 
     function yzm() {
         email = document.getElementById('email');
-        console.log(email.value);
         $.get('/email/?email=' + email.value, function (res) {
             console.log(res)
         })
@@ -63,9 +74,11 @@
     
     function reg() {
         data = $('form').serialize();
-        console.log(data);
         $.post('/register/', data, function (result) {
-            console.log(result)
+            if(result['result'] == 0){
+                alert(result['message']);
+                $(location).attr('href', '/register/');
+            }
         })
     }
 

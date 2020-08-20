@@ -1,5 +1,8 @@
+import random
+from datetime import datetime
 from flask import render_template, request, flash, jsonify, redirect
-from flask_mail import Message, Mail
+from werkzeug.security import generate_password_hash
+from flask_mail import Message
 from flask_login import login_user, login_required, logout_user
 from app.users import users
 from app.users import forms
@@ -48,28 +51,51 @@ def register():
     """注册"""
     form = forms.RegForm()
     if request.method == 'POST':
-        email = form.email.data
-        password_1 = form.password_1.data
-        password_2 = form.password_2.data
-        code = form.code.data
-        # print(email)
-        # print(password_1)
-        # print(password_2)
-        # print(code)
+        # 表单验证
+        if form.validate():
+            from app import redis_cli
+            email = form.email.data
+            password_1 = form.password_1.data
+            password_2 = form.password_2.data
+            code = form.code.data
+            # 从redis中获取验证码
+            key = redis_cli.get(email)
+            # 验证2次密码是否一致， 以及验证码是否正确
+            if password_1 == password_2 and key.decode('utf-8') == code:
+                from app.models import Users
+                user = Users()
+                # 默认用户名为邮箱
+                user.username = email
+                user.email = email
+                # 密码进行哈希加密
+                user.password = generate_password_hash(password_2)
+                user.reg_time = datetime.now()
+                user.save()
+                return redirect('/login/')
+            else:
+                return jsonify({'result': 0, 'message': '密码不一致'})
+
     return render_template('/users/register.html', form=form)
 
 
 @users.route('/email/')
 def email():
     """发送验证邮件"""
-    if request.method == 'POST':
-        pass
     email = request.args.get('email')
-    print('1email:', email)
     if not email:
-        return jsonify({'result': '邮箱为空'})
+        return jsonify({'result': 0, 'message': '邮箱为空'})
     else:
-        pass
+        from app import mail, redis_cli
+        try:
+            msg = Message('Verification Code', sender='2549012701@qq.com', recipients=[email])
+            num = f'{random.randint(1, 9999):04}'
+            msg.body = num
+            # 发送邮件
+            mail.send(msg)
+            # 向redis中添加验证码，60s过期
+            redis_cli.set(email, num, ex=60)
+        except Exception as e:
+            return jsonify({'result': 0, 'message': str(e)})
 
-    return jsonify({'result': 1})
+        return jsonify({'result': 1})
 

@@ -34,7 +34,7 @@ class Users(Base):
     # 用户名
     username = db.Column(db.String(32), unique=True)
     # 密码
-    password = db.Column(db.String(32))
+    password = db.Column(db.String(128))
     # 手机号
     phone = db.Column(db.String(32), nullable=True, unique=True)
     # 邮箱

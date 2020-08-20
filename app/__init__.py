@@ -1,7 +1,9 @@
+import redis
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
+from flask_mail import Mail
 from app.users import users
 from app.blogs import blogs
 from app.admins import admins
@@ -13,6 +15,10 @@ db = SQLAlchemy()
 csrf = CSRFProtect()
 # 登录验证
 login_manager = LoginManager()
+# 邮箱
+mail = Mail()
+# redis
+redis_cli = redis.Redis()
 
 
 # 定义获取登录用户的方法
@@ -27,13 +33,15 @@ def make_app(config=MySQLConfig):
     app = Flask(__name__, static_url_path='/static/', template_folder='templates')
     # 配置app
     app.config.from_object(config)
-    # 解决jinja2于vue的冲突
+    # 解决jinja2与vue的冲突
     app.jinja_env.variable_start_string = '{['
     app.jinja_env.variable_end_string = ']}'
     # 数据库绑定app
     db.init_app(app)
     # CSRF绑定app
     csrf.init_app(app)
+    # 邮箱绑定app
+    mail.init_app(app)
     # 登录绑定app
     login_manager.init_app(app)
     login_manager.login_view = '/login/'
