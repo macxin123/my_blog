@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import CSRFProtect
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_pymongo import PyMongo
+from flask_pagedown import PageDown
 from app.users import users
 from app.blogs import blogs
 from app.admins import admins
@@ -19,6 +21,10 @@ login_manager = LoginManager()
 mail = Mail()
 # redis
 redis_cli = redis.Redis()
+# mongoDB
+pymongo = PyMongo()
+# markdown
+mk = PageDown()
 
 
 # 定义获取登录用户的方法
@@ -46,6 +52,10 @@ def make_app(config=MySQLConfig):
     login_manager.init_app(app)
     login_manager.login_view = '/login/'
     login_manager.session_protection = 'strong'
+    # mongoDB
+    pymongo.init_app(app, uri='mongodb://localhost:27017/blog')
+    # markdown
+    mk.init_app(app)
     # 注册app
     app.register_blueprint(users)
     app.register_blueprint(blogs, url_prefix='/blogs/')
