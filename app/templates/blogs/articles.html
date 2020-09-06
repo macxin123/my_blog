@@ -6,28 +6,32 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.0/dist/css/bootstrap.min.css"
           integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/editormd/css/editormd.css">
+    <style>
+        [v-cloak] {
+            display: none !important;
+        }
+    </style>
 </head>
 <body>
-    <div class="container-fluid">
+    <div class="container-fluid" id="app">
         <div class="row">
             <div class="col-md-3">
                 <div class="position-fixed">
                     <ul class="list-group">
-                        <li class="list-group-item list-group-item-primary"><a href="#no1">新文章发布</a></li>
-                        <li class="list-group-item list-group-item-primary"><a href="#no2">nadasdasdasdasdo2</a></li>
-                        <li class="list-group-item list-group-item-primary"><a href="#no3">noasdasdasdadasd3</a></li>
-                        <li class="list-group-item list-group-item-primary"><a href="#no3">修改/提交</a></li>
+                        <li v-cloak v-for="i in all_data" class="list-group-item list-group-item-primary">
+                            <a v-bind:href="i.id | spp">{{ i.title }}</a>
+                        </li>
                     </ul>
                 </div>
             </div>
-            <div class="col-md-9" id="app">
+            <div class="col-md-9">
                 <div>
                     <section id="no1">
                         <form method="post" id="forms">
                             {[ form.csrf_token ]}
                             <div class="form-group">
-                                <label for="exampleInputEmail1">文章标题</label>
-                                <input type="text" class="form-control" name="title" id="exampleInputEmail1"
+                                <label for="title">文章标题</label>
+                                <input type="text" class="form-control" name="title" id="title"
                                        aria-describedby="emailHelp">
                                 <small id="emailHelp" class="form-text text-muted">请控制在32个字符以内</small>
                             </div>
@@ -40,8 +44,8 @@
                             <button type="button" class="btn btn-danger">保存</button>
                         </form>
                     </section>
+                    <hr class="m-3">
                 </div>
-                <hr class="m-3">
             </div>
         </div>
     </div>
@@ -66,7 +70,7 @@
                 height: 640,
                 syncScrolling: "single",
                 path: "{[ url_for('static',filename='editormd/lib/') ]}",
-                saveHTMLToTextarea : true
+                saveHTMLToTextarea : true,
             });
         });
     </script>
@@ -74,8 +78,13 @@
     <script>
         function tj() {
             data = $('#forms').serialize();
-            console.log(data);
-            $.post('/blogs/articles/save/', data)
+            $.post('/blogs/articles/save/', data, function (result) {
+                if (result['result'] == 1){
+                    alert('添加成功！！！')
+                }else{
+                    alert('添加失败！！！')
+                }
+            })
         }
     </script>
 
@@ -85,11 +94,21 @@
         new Vue({
             el: '#app',
             data: {
-                result:''
+                all_data: ''
+            },
+            filters: {
+                spp: function (value) {
+                    return "/blogs/articles/aid" + "/#" + value
+                }
             },
             mounted() {
-                // axios.get()
-            }
+                axios.get('/blogs/query/')
+                    .then((response) => {
+                        this.all_data = response['data'];
+                        console.log(this.all_data)
+                    })
+            },
+
         })
     </script>
 

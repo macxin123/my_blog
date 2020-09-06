@@ -1,4 +1,4 @@
-from flask_login import UserMixin
+from flask_login import UserMixin, AnonymousUserMixin
 from werkzeug.security import check_password_hash
 from app import db
 
@@ -101,8 +101,10 @@ class Articles(Base):
     title = db.Column(db.String(32))
     # 外键,作者id
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    # 文章内容
+    # 文章html内容
     a_content = db.Column(db.Text)
+    # 文章md内容
+    body = db.Column(db.Text, default='')
     # 文章点赞
     good = db.Column(db.Integer, default=0)
     # 文章点踩
