@@ -36,7 +36,7 @@ def save_articles():
         article.author_id = current_user.id
         article.a_time = datetime.now()
         article.save()
-        return jsonify({'result': 1})
+        return redirect('/articles/save/')
 
     return jsonify({'result': 0})
 

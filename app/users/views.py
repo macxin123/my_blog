@@ -1,9 +1,10 @@
+import os
 import random
 from datetime import datetime
 from flask import render_template, request, flash, jsonify, redirect
 from werkzeug.security import generate_password_hash
 from flask_mail import Message
-from flask_login import login_user, login_required, logout_user
+from flask_login import login_user, login_required, logout_user, current_user
 from app.users import users
 from app.users import forms
 
@@ -122,4 +123,58 @@ def email():
             return jsonify({'result': 0, 'message': str(e)})
 
         return jsonify({'result': 1})
+
+
+@users.route('/users/', methods=['GET', 'POST'])
+@login_required
+def user():
+    """用户个人中心界面"""
+    form = forms.LoginForm()
+    return render_template('/users/users.html', form=form)
+
+
+@users.route('/alter/avatar/', methods=['GET', 'POST'])
+@login_required
+def alter_avatar():
+    """修改头像接口"""
+    if request.method == 'POST':
+        print('*' * 100)
+        user_id = current_user.id
+        from app.models import Users
+        user = Users.query.get(user_id)
+        file = request.files['file']
+
+        # 修改文件名，使用id+随机数
+        filename = file.filename
+        filename = filename.rsplit('.', 1)
+        name = filename[0] + str(user_id) + str(random.randint(1, 999))
+        filename = name + '.' + filename[1]
+
+        user.avatar = filename
+        # user.update()
+        print('filename:', filename)
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + f'\static\\users\\ava\\{user_id}\\'
+        if not os.path.exists(base_dir):
+            os.makedirs(base_dir)
+        save_path = base_dir + f'{filename}'
+        file.save(save_path)
+        user.update()
+        return redirect('/users/')
+
+    return jsonify({'result': 0})
+
+
+@users.route('/avater/')
+def avater():
+    """查询头像接口"""
+    user_id = current_user.id
+    from app.models import Users
+    user = Users.query.get(user_id)
+    return jsonify({'avater': user.avatar, 'id': user_id})
+
+
+@users.route('/alter/info/')
+def alter_info():
+    """修改个人资料"""
+    return render_template('/users/info.html')
 

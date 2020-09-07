@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>users</title>
+    <link href="https://fonts.googleapis.com/css?family=Poppins:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+
+    <link rel="stylesheet" href="/static/css/open-iconic-bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/animate.css">
+
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="/static/css/owl.theme.default.min.css">
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <link rel="stylesheet" href="/static/css/aos.css">
+    <link rel="stylesheet" href="/static/css/ionicons.min.css">
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <link rel="stylesheet" href="/static/css/icomoon.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+
+    <style>
+        #tx {
+            width: 500px;
+            height: 500px;
+            top: 50%;
+            position: fixed;
+            margin-top: -300px;
+        }
+        #tx form img{
+            width: 500px;
+            height: 500px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="container-fluid" id="app">
+    <div class="row">
+        <div class="col-md-4">​
+            <div id="tx">
+                <form action="/alter/avatar/" id="forms" class="was-validated" method="POST" enctype="multipart/form-data">
+                    {[ form.csrf_token ]}
+                    <img v-bind:src="id,avater | spp" class="img-fluid" alt="Responsive image">
+                    <br>
+                    <br>
+                    <div class="input-group is-invalid">
+                        <div class="custom-file">
+                            <input type="file" name="file" class="custom-file-input" id="validatedInputGroupCustomFile">
+                            <label class="custom-file-label" for="validatedInputGroupCustomFile">请选择图片...</label>
+                        </div>
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-primary" type="submit">更换头像</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <section class="ftco-section" id="services-section">
+                <div class="container-fluid px-md-5">
+                    <div class="row justify-content-center py-5 mt-5">
+                        <div class="col-md-12 heading-section text-center ftco-animate">
+                            <h1 class="big big-2">功能</h1>
+                            <h2 class="mb-4">个人中心</h2>
+                            <p>请选择您接下来要做什么？do every you want to do</p>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 text-center d-flex ftco-animate">
+                            <a href="/alter/info/" class="services-1 shadow">
+							<span class="icon">
+								<i class="flaticon-analysis"></i>
+							</span>
+                                <div class="desc">
+                                    <h3 class="mb-5">修改资料</h3>
+                                    <p>可以在此修改用户名以及邮箱等个人资料</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center d-flex ftco-animate">
+                            <a href="/change/" class="services-1 shadow">
+							<span class="icon">
+								<i class="flaticon-flasks"></i>
+							</span>
+                                <div class="desc">
+                                    <h3 class="mb-5">查看收藏</h3>
+                                    <p>可以在此处查看已收藏的文章</p>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-4 text-center d-flex ftco-animate">
+                            <a href="/users/" class="services-1 shadow">
+							<span class="icon">
+								<i class="flaticon-ideas"></i>
+							</span>
+                                <div class="desc">
+                                    <h3 class="mb-5">历史浏览</h3>
+                                    <p>您可以在此查看之前浏览的文章记录</p>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/jquery-migrate-3.0.1.min.js"></script>
+<script src="/static/js/popper.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/jquery.easing.1.3.js"></script>
+<script src="/static/js/jquery.waypoints.min.js"></script>
+<script src="/static/js/jquery.stellar.min.js"></script>
+<script src="/static/js/owl.carousel.min.js"></script>
+<script src="/static/js/jquery.magnific-popup.min.js"></script>
+<script src="/static/js/aos.js"></script>
+<script src="/static/js/jquery.animateNumber.min.js"></script>
+<script src="/static/js/scrollax.min.js"></script>
+<script src="/static/js/main.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    new Vue({
+        el: '#app',
+        data:{
+            avater: '',
+            id: '1'
+        },
+        filters: {
+            spp: function (id, res) {
+                return '/static/users/ava/'+ id + '/' + res
+            }
+        },
+        mounted() {
+            axios.get('/avater/')
+                .then((response) => {
+                    this.avater = response['data']['avater'];
+                    this.id = response['data']['id'];
+                    console.log(this.id)
+                })
+        }
+    })
+</script>
+
+</body>
+</html>
