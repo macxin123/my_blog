@@ -3,6 +3,7 @@ from flask import render_template, jsonify, redirect, request
 from flask_login import current_user, login_required
 from app.blogs import blogs
 from app.blogs.forms import ArticlesForm
+from app.es import es
 
 
 @blogs.route('/articles/', methods=['GET', 'POST'])
@@ -27,21 +28,32 @@ def articles_detail():
 def save_articles():
     """保存文章接口"""
     if request.method == 'POST':
+        # 将文章保存到mysql
         content = request.form.get('fancy-editormd-html-code')
         from app.models import Articles
         article = Articles()
-        article.title = request.form.get('title')
+        title = request.form.get('title')
+        article.title = title
         article.a_content = content
-        article.body = request.form.get('body')
+        body = request.form.get('body')
+        article.body = body
         article.author_id = current_user.id
         article.a_time = datetime.now()
         article.save()
+
+        # 再将新文章保存到elasticsearch
+        new_id = article.id
+        this = Articles.query.get(new_id)
+        tmp = dict(zip(this.__dict__.keys(), this.__dict__.values()))
+        tmp.pop('_sa_instance_state')
+        es.create(index='blogs', id=new_id, doc_type='politics', body=tmp)
+
         return redirect('/articles/save/')
 
     return jsonify({'result': 0})
 
 
-@blogs.route('/query/')
+@blogs.route('/query/title/')
 def query():
     """查询文章标题接口"""
     res = dict()
@@ -64,7 +76,60 @@ def alter_title(id):
     from app.models import Articles
     art = Articles.query.get(int(id))
     if request.method == 'POST':
-        art.title = request.form.get('title')
+        title = request.form.get('title')
+        print('title:', title)
+
+        # mysql更新
+        art.title = title
         art.update()
+
+        # elasticsearch更新
+        dsl = {
+            'query': {
+                'match': {
+                    'id': int(id)
+                }
+            }
+        }
+        res = es.search(index='blogs', doc_type='politics', body=dsl)
+        content = res['hits']['hits'][0]['_source']
+        content['title'] = title
+        r = es.update(index='blogs', id=id, doc_type='politics', body={'doc': content})
+        print('r:', r)
+
         return {'result': 1}
+
     return {'result': 0}
+
+
+@blogs.route('/query/blog/')
+def query_blogs():
+    dct = dict()
+    lst = ['python', '爬虫', 'centos', 'redis']
+    for i in lst:
+        dsl = {
+            'query': {
+                'match': {
+                    'title': i
+                }
+            }
+        }
+        result = es.search(index='blogs', doc_type='politics', body=dsl)
+        source = result['hits']['hits']
+        dct[i] = source
+
+    return jsonify(dct)
+
+
+@blogs.route('/del/')
+def del_blogs():
+    from app.models import Articles
+    id = request.args.get('id')
+    try:
+        blog = Articles.query.get(int(id))
+        blog.delete()
+        es.delete(index='blogs', doc_type='politics', id=id)
+        return jsonify({'result': 1})
+    except Exception as e:
+        print('e:', e)
+        return jsonify({'result': 0, 'error': str(e)})

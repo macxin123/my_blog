@@ -102,7 +102,7 @@
                 }
             },
             mounted() {
-                axios.get('/blogs/query/')
+                axios.get('/blogs/query/title/')
                     .then((response) => {
                         this.all_data = response['data'];
                         console.log(this.all_data)

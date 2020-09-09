@@ -22,20 +22,23 @@
             <div class="position-fixed">
                 <ul class="list-group">
                     <li v-cloak v-for="i in all_data" class="list-group-item list-group-item-primary">
-                        <a v-bind:href="i.id | spp">{{ i.title }}</a>
+                        <div class="row">
+                            <a class="col-sm-9" v-bind:href="i.id | spp">{{ i.title }}</a>
+                            <button class="btn btn-danger col-sm-3" v-on:click="remove(i.id)">删除</button>
+                        </div>
                     </li>
                 </ul>
             </div>
         </div>
         <div class="col-md-9">
-            <div v-for="i in all_data" v-bind:id="i.id">
-                <form method="post" id="forms">
+            <div v-for="i in all_data" v-bind:id="i.id | ids">
+                <form method="post" v-bind:id="i.id">
                     <div class="input-group">
                         <input name="title" type="text" class="form-control" v-bind:value="i.title"
                                aria-describedby="button-addon2">
                         {[ form.csrf_token ]}
                         <div class="input-group-append">
-                            <button class="btn btn-outline-secondary" v-on:click="tj_title(i.id)" type="button"
+                            <button class="btn btn-outline-primary" v-on:click="tj_title(i.id)" type="button"
                                     id="button-addon2">修改标题
                             </button>
                         </div>
@@ -88,9 +91,12 @@
             spp: function (value) {
                 return "#" + value
             },
+            ids: function (value) {
+                return value + 's'
+            }
         },
         mounted() {
-            axios.get('/blogs/query/')
+            axios.get('/blogs/query/title/')
                 .then((response) => {
                     this.all_data = response['data'];
                     console.log(this.all_data)
@@ -98,12 +104,21 @@
         },
         methods: {
             tj_title: function (res) {
-                data = $('#forms').serialize();
+                data = $('#' + res).serialize();
                 $.post('/blogs/alter/title/' + res + '/', data, function (result) {
                     if (result['result'] == 1) {
                         alert('修改成功！！！')
                     } else {
-                        alert('修改失败！！！')
+                        alert('修改失败！！！', result['error'])
+                    }
+                })
+            },
+            remove: function (res) {
+                $.get('/blogs/del/?id='+ res, function (res) {
+                    if (res['result'] == 1){
+                        alert('删除成功！！！')
+                    }else{
+                        alert('删除失败！！！')
                     }
                 })
             }
