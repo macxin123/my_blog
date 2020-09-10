@@ -12,7 +12,7 @@ from app.users import forms
 @users.route('/')
 def index():
     """首页"""
-    return render_template('/users/index.html')
+    return render_template('/users/blog_index.html')
 
 
 @users.route('/login/', methods=['GET', 'POST'])

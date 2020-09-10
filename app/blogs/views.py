@@ -20,6 +20,7 @@ def articles():
 @blogs.route('/articles/aid/', methods=['GET', 'POST'])
 @login_required
 def articles_detail():
+    """文章详情页面"""
     form = ArticlesForm()
     return render_template('/blogs/details.html/', form=form)
 
@@ -60,7 +61,7 @@ def query():
     from app.models import Articles
     result = Articles.query.all()
     for i in result:
-        res[i.id] = {'id': i.id,  'title': i.title, 'body': i.body, 'html': i.a_content}
+        res[i.id] = {'id': i.id, 'title': i.title, 'body': i.body, 'html': i.a_content}
     return jsonify(res)
 
 
@@ -102,8 +103,9 @@ def alter_title(id):
     return {'result': 0}
 
 
-@blogs.route('/query/blog/')
+@blogs.route('/query/blog/', methods=['GET', 'POST'])
 def query_blogs():
+    """显示在首页的博客接口"""
     dct = dict()
     lst = ['python', '爬虫', 'centos', 'redis']
     for i in lst:
@@ -112,7 +114,13 @@ def query_blogs():
                 'match': {
                     'title': i
                 }
-            }
+            },
+            "sort": {
+                "good": {
+                    "order": "asc"
+                }
+            },
+            'size': 5
         }
         result = es.search(index='blogs', doc_type='politics', body=dsl)
         source = result['hits']['hits']
@@ -123,11 +131,14 @@ def query_blogs():
 
 @blogs.route('/del/')
 def del_blogs():
+    """删除文章接口"""
     from app.models import Articles
     id = request.args.get('id')
     try:
+        # mysql删除
         blog = Articles.query.get(int(id))
         blog.delete()
+        # elasticsearch删除
         es.delete(index='blogs', doc_type='politics', id=id)
         return jsonify({'result': 1})
     except Exception as e:

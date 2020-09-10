@@ -37,11 +37,36 @@ dsl2 = {
     }
 }
 
+dsl3 = {
+    'query': {
+        'bool': {
+            'must': [
+                {
+                    'match': {
+                        'title': 'python'
+                    }
+                },
+                {
+                    'match': {
+                        'author_id': 6
+                    }
+                }
+            ]
+        }
+    },
+    "sort": {
+        "good": {                 # 根据age字段升序排序
+            "order": "asc"       # asc升序，desc降序
+        }
+    },
+    'size': 4
+}
+
 # s = es.update(index='blogs', id='19', doc_type='politics', body=dsl1, ignore=400)
 
 # s = es.delete(index='blogs', doc_type='politics', id='23')
 #
-# res = es.search(index='blogs', doc_type='politics', body=dsl2)
+res = es.search(index='blogs', doc_type='politics', body=dsl3)
 
 # print(s)
 # print(res)
